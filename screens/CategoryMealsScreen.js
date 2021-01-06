@@ -1,35 +1,29 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { View, StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
+import DefaultText from '../components/DefaultText';
 
-import MealItem from '../components/MealItem';
-import { CATEGORIES, MEALS } from '../data/dummy-data';
+import MealList from '../components/MealList';
+import { CATEGORIES } from '../data/dummy-data';
 
 const CategoryMealsScreen = props => {
 
-    const renderMealItem = itemData => {
-        return <MealItem 
-                    title={itemData.item.title}
-                    duration={itemData.item.duration}
-                    complexity={itemData.item.complexity}
-                    affordability={itemData.item.affordability} 
-                    image={itemData.item.imageUrl}
-                    onSelectMeal={() => {}} 
-                />;
+    const catId = props.navigation.getParam('categoryId');
+
+    const availableMeals = useSelector(state => state.meals.filteredMeals);
+
+    const displayedMeals = availableMeals.filter(meal => meal.categoryIds.indexOf(catId) >= 0);
+
+    if (displayedMeals.length === 0){
+        return (
+            <View style={styles.content}>
+                <DefaultText>No meals found, maybe check your filters?</DefaultText>
+            </View>
+        );
     }
 
-    const catId = props.navigation.getParam('categoryId');
-    const displayMeals = MEALS.filter(meal => meal.categoryIds.indexOf(catId) >= 0);
-
     return (
-        <View style={styles.screen}>
-           <FlatList 
-                data={displayMeals} 
-                keyExtractor={(item, index) => item.id} 
-                renderItem={renderMealItem} 
-                style={{ width: '100%'}}
-            />
-        </View>
+        <MealList listData={displayedMeals} navigation={props.navigation} />
     );
 };
 
@@ -43,10 +37,10 @@ CategoryMealsScreen.navigationOptions = navigationData => {
 };
 
 const styles = StyleSheet.create({
-    screen: {
+    content: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     }
 });
 
